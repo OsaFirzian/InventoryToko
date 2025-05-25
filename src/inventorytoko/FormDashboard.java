@@ -478,13 +478,21 @@ public class FormDashboard extends javax.swing.JFrame {
     private void StokBarangMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StokBarangMouseClicked
     FormStokbarang stokBarang = new FormStokbarang();
     stokBarang.setVisible(true); // Menampilkan form baru
-    this.dispose(); // Menutup form sekarang        // TODO add your handling code here:
+    
+    //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
+    new FormStokbarang(this.loggedInUsername, this.loggedInRole).setVisible(true);
+    
+    this.dispose(); // Menutup form sekarang
     }//GEN-LAST:event_StokBarangMouseClicked
 
     private void DashboardMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DashboardMouseClicked
     FormDashboard dashboard = new FormDashboard();
     dashboard.setVisible(true);
-    this.dispose();        // TODO add your handling code here:
+    
+    //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
+    new FormDashboard(this.loggedInUsername, this.loggedInRole).setVisible(true);
+    
+    this.dispose();
     }//GEN-LAST:event_DashboardMouseClicked
     
     /**

@@ -110,7 +110,7 @@ public class FormLogin extends javax.swing.JFrame {
         if (String.valueOf(PasswordUser.getPassword()).equals("     Password")) {
             PasswordUser.setText("");
             PasswordUser.setEchoChar('*'); // Tampilkan bintang saat mulai mengetik
-            PasswordUser.setForeground(new java.awt.Color(204, 204, 204));
+            PasswordUser.setForeground(new java.awt.Color(0,0,0));
             PasswordUser.setFont(new java.awt.Font("Segoe UI", 0, 16));
         }
     }//GEN-LAST:event_PasswordUserFocusGained
@@ -127,7 +127,7 @@ public class FormLogin extends javax.swing.JFrame {
     private void TeksUserFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_TeksUserFocusGained
         if (String.valueOf(TeksUser.getText()).equals("     Username")) {
             TeksUser.setText("");
-            TeksUser.setForeground(new java.awt.Color(204, 204, 204));
+            TeksUser.setForeground(new java.awt.Color(0, 0, 0));
             TeksUser.setFont(new java.awt.Font("Segoe UI", 0, 16));
         }
     }//GEN-LAST:event_TeksUserFocusGained
@@ -177,7 +177,7 @@ public class FormLogin extends javax.swing.JFrame {
             if (role.equals("Admin")) {
                 new FormDashboard(username, role).setVisible(true);
             } else if (role.equals("Staff")) {
-                new FormStokbarang(username).setVisible(true);
+                new FormStokbarang(username, role).setVisible(true);
             }
         } else {
             JOptionPane.showMessageDialog(this, "Username atau password salah!");

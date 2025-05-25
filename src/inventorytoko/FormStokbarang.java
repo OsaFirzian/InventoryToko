@@ -3,6 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package inventorytoko;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import javax.swing.Timer;
+import koneksi.koneksi;
 
 /**
  *
@@ -10,21 +14,49 @@ package inventorytoko;
  */
 public class FormStokbarang extends javax.swing.JFrame {
     
+//        private String username; // Tambahkan field untuk menyimpan username
+        private String loggedInUsername; // Untuk menyimpan username yang login
+        private String loggedInRole;     // Untuk menyimpan role yang login
+
+        //Buat Jam
+    private void showTanggalDanJam() {
+        // Format tanggal
+        SimpleDateFormat tglFormat = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat jamFormat = new SimpleDateFormat("HH:mm:ss");
+
+        // Timer berjalan setiap detik
+        Timer timer = new Timer(1000, (e) -> {
+            Date now = new Date();
+            labelTanggal.setText(tglFormat.format(now));
+            labelJam.setText(jamFormat.format(now));
+        });
+        timer.start();
+    }
     
-    private String username; //Field untuk menyimpan username
+    private void displayUserAndRole() {
+        
+        labelUser.setText("User: " + loggedInUsername + "   Role: " + loggedInRole); 
+        // Pastikan Anda memiliki JLabel dengan nama lblUserInfo di desain FormDashboard Anda.
+    } 
     
     /**
      * Creates new form TampilanUtama
      */
-    public FormStokbarang(String username) {
-        initComponents();
-        this.username = username;
-    }
-    
     public FormStokbarang() {
         initComponents();
+        showTanggalDanJam();
     }
-
+    
+    public FormStokbarang(String username, String role) {
+        initComponents();
+//        this.username = username;
+        showTanggalDanJam();
+        
+        this.loggedInUsername = username;
+        this.loggedInRole = role;
+        displayUserAndRole();
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -35,14 +67,17 @@ public class FormStokbarang extends javax.swing.JFrame {
     private void initComponents() {
 
         baseBG = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
         Laporan = new javax.swing.JButton();
         DataPenyewa = new javax.swing.JButton();
         BarangKeluar = new javax.swing.JButton();
         BarangMasuk = new javax.swing.JButton();
         StokBarang = new javax.swing.JButton();
         Dashboard = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        labelJam = new javax.swing.JLabel();
+        labelTanggal = new javax.swing.JLabel();
+        labelUser = new javax.swing.JLabel();
         Title = new javax.swing.JLabel();
         exitbtn = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
@@ -67,6 +102,80 @@ public class FormStokbarang extends javax.swing.JFrame {
             }
         });
         baseBG.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
+            },
+            new String [] {
+                "Kode Barang", "Nama Barang", "Stok Barang"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Object.class, java.lang.Object.class, java.lang.Integer.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(jTable2);
+        if (jTable2.getColumnModel().getColumnCount() > 0) {
+            jTable2.getColumnModel().getColumn(0).setPreferredWidth(50);
+            jTable2.getColumnModel().getColumn(1).setPreferredWidth(300);
+        }
+
+        baseBG.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(182, 180, 570, 390));
 
         Laporan.setBackground(new java.awt.Color(254, 129, 0));
         Laporan.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
@@ -182,25 +291,22 @@ public class FormStokbarang extends javax.swing.JFrame {
         });
         baseBG.add(Dashboard, new org.netbeans.lib.awtextra.AbsoluteConstraints(5, 130, 135, 35));
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        labelJam.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        labelJam.setText("HH:mm:ss");
+        baseBG.add(labelJam, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 110, 70, 15));
 
-        baseBG.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 180, 620, 400));
+        labelTanggal.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        labelTanggal.setText("yyyy-MM-dd");
+        baseBG.add(labelTanggal, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 110, 90, 15));
+
+        labelUser.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        labelUser.setText("User");
+        baseBG.add(labelUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 130, 160, 15));
 
         Title.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         Title.setForeground(new java.awt.Color(51, 51, 51));
-        Title.setText("STOK BARANG");
-        baseBG.add(Title, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 120, -1, -1));
+        Title.setText("DASHBOARD");
+        baseBG.add(Title, new org.netbeans.lib.awtextra.AbsoluteConstraints(360, 118, -1, -1));
 
         exitbtn.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
         exitbtn.setForeground(new java.awt.Color(255, 255, 255));
@@ -232,7 +338,9 @@ public class FormStokbarang extends javax.swing.JFrame {
     
     // Button Exit
     private void exitbtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_exitbtnMouseClicked
-        dispose();
+        FormLogin login = new FormLogin();
+        login.setVisible(true);
+        this.dispose(); 
     }//GEN-LAST:event_exitbtnMouseClicked
 
     private void baseBGMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_baseBGMouseClicked
@@ -345,16 +453,26 @@ public class FormStokbarang extends javax.swing.JFrame {
         Laporan.setForeground(new java.awt.Color(255, 255, 255));
     }//GEN-LAST:event_LaporanMouseExited
 
+    
+    //Perpindahan Antar Dashboard
     private void StokBarangMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StokBarangMouseClicked
-        FormStokbarang stokBarang = new FormStokbarang();
-        stokBarang.setVisible(true); // Menampilkan form baru
-        this.dispose(); // Menutup form sekarang
+    FormStokbarang stokBarang = new FormStokbarang();
+    stokBarang.setVisible(true); // Menampilkan form baru
+    
+    //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
+    new FormStokbarang(this.loggedInUsername, this.loggedInRole).setVisible(true);
+    
+    this.dispose(); // Menutup form sekarang
     }//GEN-LAST:event_StokBarangMouseClicked
 
     private void DashboardMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DashboardMouseClicked
-        FormDashboard dashboard = new FormDashboard();
-        dashboard.setVisible(true);
-        this.dispose();
+    FormDashboard dashboard = new FormDashboard();
+    dashboard.setVisible(true);
+    
+    //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
+    new FormDashboard(this.loggedInUsername, this.loggedInRole).setVisible(true);
+    
+    this.dispose();
     }//GEN-LAST:event_DashboardMouseClicked
     
     /**
@@ -407,6 +525,9 @@ public class FormStokbarang extends javax.swing.JFrame {
     private javax.swing.JPanel baseBG;
     private javax.swing.JLabel exitbtn;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
+    private javax.swing.JLabel labelJam;
+    private javax.swing.JLabel labelTanggal;
+    private javax.swing.JLabel labelUser;
     // End of variables declaration//GEN-END:variables
 }

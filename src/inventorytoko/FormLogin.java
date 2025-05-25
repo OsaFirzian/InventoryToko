@@ -172,11 +172,10 @@ public class FormLogin extends javax.swing.JFrame {
         
         if (rs.next()) {
             String role = rs.getString("role");
-            JOptionPane.showMessageDialog(this, "Login berhasil sebagai " + role);
             this.setVisible(false); // sembunyikan login form
 
             if (role.equals("Admin")) {
-                new FormDashboard(username).setVisible(true);
+                new FormDashboard(username, role).setVisible(true);
             } else if (role.equals("Staff")) {
                 new FormStokbarang(username).setVisible(true);
             }

@@ -14,22 +14,31 @@ import koneksi.koneksi;
  */
 public class FormDashboard extends javax.swing.JFrame {
     
-    private String username; // Tambahkan field untuk menyimpan username
-    
-    //Buat Jam
-    private void showTanggalDanJam() {
-    // Format tanggal
-    SimpleDateFormat tglFormat = new SimpleDateFormat("dd-MM-yyyy");
-    SimpleDateFormat jamFormat = new SimpleDateFormat("HH:mm:ss");
+//        private String username; // Tambahkan field untuk menyimpan username
+        private String loggedInUsername; // Untuk menyimpan username yang login
+        private String loggedInRole;     // Untuk menyimpan role yang login
 
-    // Timer berjalan setiap detik
-    Timer timer = new Timer(1000, (e) -> {
-        Date now = new Date();
-        labelTanggal.setText(tglFormat.format(now));
-        labelJam.setText(jamFormat.format(now));
-    });
-    timer.start();
-}
+        //Buat Jam
+    private void showTanggalDanJam() {
+        // Format tanggal
+        SimpleDateFormat tglFormat = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat jamFormat = new SimpleDateFormat("HH:mm:ss");
+
+        // Timer berjalan setiap detik
+        Timer timer = new Timer(1000, (e) -> {
+            Date now = new Date();
+            labelTanggal.setText(tglFormat.format(now));
+            labelJam.setText(jamFormat.format(now));
+        });
+        timer.start();
+    }
+    
+    private void displayUserAndRole() {
+        
+        labelUser.setText("User: " + loggedInUsername + "   Role: " + loggedInRole); 
+        // Pastikan Anda memiliki JLabel dengan nama lblUserInfo di desain FormDashboard Anda.
+    } 
+    
     /**
      * Creates new form TampilanUtama
      */
@@ -38,10 +47,14 @@ public class FormDashboard extends javax.swing.JFrame {
         showTanggalDanJam();
     }
     
-    public FormDashboard(String username) {
+    public FormDashboard(String username, String role) {
         initComponents();
-        this.username = username;
+//        this.username = username;
         showTanggalDanJam();
+        
+        this.loggedInUsername = username;
+        this.loggedInRole = role;
+        displayUserAndRole();
     }
     
     /**
@@ -63,7 +76,6 @@ public class FormDashboard extends javax.swing.JFrame {
         labelJam = new javax.swing.JLabel();
         labelTanggal = new javax.swing.JLabel();
         labelUser = new javax.swing.JLabel();
-        labelRole = new javax.swing.JLabel();
         pn_penyewa = new javax.swing.JPanel();
         penyewa = new javax.swing.JLabel();
         IconPenyewa = new javax.swing.JLabel();
@@ -229,11 +241,7 @@ public class FormDashboard extends javax.swing.JFrame {
 
         labelUser.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         labelUser.setText("User");
-        baseBG.add(labelUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 130, 70, 15));
-
-        labelRole.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        labelRole.setText("Role");
-        baseBG.add(labelRole, new org.netbeans.lib.awtextra.AbsoluteConstraints(690, 130, 90, 15));
+        baseBG.add(labelUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(620, 130, 160, 15));
 
         pn_penyewa.setBackground(new java.awt.Color(255, 179, 71));
         pn_penyewa.setBorder(javax.swing.BorderFactory.createCompoundBorder(null, javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 3)));
@@ -537,7 +545,6 @@ public class FormDashboard extends javax.swing.JFrame {
     private javax.swing.JLabel jumlahBarang1;
     private javax.swing.JLabel jumlahBarangMasuk;
     private javax.swing.JLabel labelJam;
-    private javax.swing.JLabel labelRole;
     private javax.swing.JLabel labelTanggal;
     private javax.swing.JLabel labelUser;
     private javax.swing.JLabel nilaipenyewa;

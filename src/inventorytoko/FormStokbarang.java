@@ -1,24 +1,29 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
-package inventorytoko;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import javax.swing.Timer;
-import koneksi.koneksi;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;//di add karena form ini terdapat table
+    /*
+     * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+     * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
+     */
+    package inventorytoko;
+    import java.sql.Connection;
+    import java.sql.ResultSet;
+    import java.sql.PreparedStatement;
+    import java.text.SimpleDateFormat;
+    import java.util.Date;
+    import java.util.Set;
+    import javax.swing.Timer;
+    import koneksi.koneksi;
+    import javax.swing.JOptionPane;
+    import javax.swing.JTable;
+    import javax.swing.table.DefaultTableModel;//di add karena form ini terdapat table
+    import javax.swing.event.DocumentEvent;
+    import javax.swing.event.DocumentListener;
 
-/**
- *
- * @author OsaFirzian
- */
-public class FormStokbarang extends javax.swing.JFrame {
-    
-//        private String username; // Tambahkan field untuk menyimpan username
+    /**
+     *
+     * @author OsaFirzian
+     */
+    public class FormStokbarang extends javax.swing.JFrame {
+
+    //private String username; // Tambahkan field untuk menyimpan username
         private String loggedInUsername; // Untuk menyimpan username yang login
         private String loggedInRole;     // Untuk menyimpan role yang login
 
@@ -43,13 +48,15 @@ public class FormStokbarang extends javax.swing.JFrame {
         // Pastikan Anda memiliki JLabel dengan nama lblUserInfo di desain FormDashboard Anda.
     } 
     
+    
+    
     //method untuk menampilkan data pada table di database ke table di JFORM
     
     private Connection conn = new koneksi().connect(); //Untuk Konek ke database
     private DefaultTableModel tabmode; //Deklarasi
     
     protected void datatable(){
-        Object[] Baris ={"kode_barang","nama_barang","stok_barang"};
+        Object[] Baris ={"Kode Barang","Nama Barang","Stok Barang"};
         tabmode = new DefaultTableModel(null, Baris);
         tableStokbarang.setModel(tabmode);
         String sql = "select * from stokbarang";
@@ -63,14 +70,51 @@ public class FormStokbarang extends javax.swing.JFrame {
                String b = hasil.getString("nama_barang");
                String c = hasil.getString("stok_barang");
                
+//               System.out.println(a + " " + b + " " + c); // debug
+               
                String[] data = {a,b,c};
                tabmode.addRow(data);
            }
        } catch (Exception e){
-           e.printStackTrace(); // Ini akan mencetak detail error ke konsol NetBeans (Output Window)
-    JOptionPane.showMessageDialog(this, "Error memuat data: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace(); // Ini akan mencetak detail error ke konsol NetBeans (Output Window)
+            JOptionPane.showMessageDialog(this, "Error memuat data: " + e.getMessage(), "Error Database", JOptionPane.ERROR_MESSAGE);
        }
     }
+    
+    
+    private JTable tableStokBarang;
+
+    //Buat Search Barang
+    private void searchBarang() {
+    String keyword = textSearchbar.getText();
+    DefaultTableModel model = new DefaultTableModel();
+    model.addColumn("Kode Barang");
+    model.addColumn("Nama Barang");
+    model.addColumn("Stok Barang");
+
+    try {
+        String sql = "SELECT * FROM stokbarang WHERE kode_barang LIKE ? OR nama_barang LIKE ?";
+        Connection conn = new koneksi().connect(); // Pastikan class koneksi ada
+        PreparedStatement pst = conn.prepareStatement(sql);
+        pst.setString(1, "%" + keyword + "%");
+        pst.setString(2, "%" + keyword + "%");
+
+        ResultSet rs = pst.executeQuery();
+        while (rs.next()) {
+            model.addRow(new Object[]{
+                rs.getString("kode_barang"),
+                rs.getString("nama_barang"),
+                rs.getInt("stok_barang")
+            });
+        }
+
+            tableStokbarang.setModel(model); // Sesuaikan nama tabel kamu
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error saat mencari data: " + e.getMessage());
+        }
+    }
+
+    
     
     /**
      * Creates new form TampilanUtama
@@ -78,6 +122,7 @@ public class FormStokbarang extends javax.swing.JFrame {
     public FormStokbarang() {
         initComponents();
         showTanggalDanJam();
+       
     }
     
     public FormStokbarang(String username, String role) {
@@ -89,6 +134,23 @@ public class FormStokbarang extends javax.swing.JFrame {
         this.loggedInRole = role;
         displayUserAndRole();
         datatable();
+        
+//      tableStokBarang = new JTable();
+
+        
+            textSearchbar.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                searchBarang();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                searchBarang();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                searchBarang();
+            }
+        });
     }
     
     /**
@@ -103,6 +165,7 @@ public class FormStokbarang extends javax.swing.JFrame {
         baseBG = new javax.swing.JPanel();
         containerTable = new javax.swing.JScrollPane();
         tableStokbarang = new javax.swing.JTable();
+        textSearchbar = new javax.swing.JTextField();
         Laporan = new javax.swing.JButton();
         DataPenyewa = new javax.swing.JButton();
         BarangKeluar = new javax.swing.JButton();
@@ -201,20 +264,35 @@ public class FormStokbarang extends javax.swing.JFrame {
             Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
 
             public Class getColumnClass(int columnIndex) {
                 return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
             }
         });
         tableStokbarang.setRowHeight(25);
         tableStokbarang.setRowMargin(5);
         containerTable.setViewportView(tableStokbarang);
         if (tableStokbarang.getColumnModel().getColumnCount() > 0) {
-            tableStokbarang.getColumnModel().getColumn(0).setPreferredWidth(50);
+            tableStokbarang.getColumnModel().getColumn(0).setResizable(false);
+            tableStokbarang.getColumnModel().getColumn(0).setPreferredWidth(75);
+            tableStokbarang.getColumnModel().getColumn(1).setResizable(false);
             tableStokbarang.getColumnModel().getColumn(1).setPreferredWidth(300);
+            tableStokbarang.getColumnModel().getColumn(2).setResizable(false);
+            tableStokbarang.getColumnModel().getColumn(2).setPreferredWidth(50);
         }
 
-        baseBG.add(containerTable, new org.netbeans.lib.awtextra.AbsoluteConstraints(182, 180, 570, 390));
+        baseBG.add(containerTable, new org.netbeans.lib.awtextra.AbsoluteConstraints(182, 230, 570, 340));
+
+        textSearchbar.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        textSearchbar.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0), 2));
+        baseBG.add(textSearchbar, new org.netbeans.lib.awtextra.AbsoluteConstraints(184, 190, 180, 25));
 
         Laporan.setBackground(new java.awt.Color(254, 129, 0));
         Laporan.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
@@ -568,5 +646,6 @@ public class FormStokbarang extends javax.swing.JFrame {
     private javax.swing.JLabel labelTanggal;
     private javax.swing.JLabel labelUser;
     private javax.swing.JTable tableStokbarang;
+    private javax.swing.JTextField textSearchbar;
     // End of variables declaration//GEN-END:variables
 }

@@ -126,6 +126,9 @@ public class FormDashboard extends javax.swing.JFrame {
         Laporan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         Laporan.setFocusPainted(false);
         Laporan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                LaporanMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 LaporanMouseEntered(evt);
             }
@@ -144,6 +147,9 @@ public class FormDashboard extends javax.swing.JFrame {
         DataPenyewa.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         DataPenyewa.setFocusPainted(false);
         DataPenyewa.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                DataPenyewaMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 DataPenyewaMouseEntered(evt);
             }
@@ -162,6 +168,9 @@ public class FormDashboard extends javax.swing.JFrame {
         BarangKeluar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         BarangKeluar.setFocusPainted(false);
         BarangKeluar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BarangKeluarMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 BarangKeluarMouseEntered(evt);
             }
@@ -180,6 +189,9 @@ public class FormDashboard extends javax.swing.JFrame {
         BarangMasuk.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         BarangMasuk.setFocusPainted(false);
         BarangMasuk.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                BarangMasukMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 BarangMasukMouseEntered(evt);
             }
@@ -476,9 +488,7 @@ public class FormDashboard extends javax.swing.JFrame {
     
     //Perpindahan Antar Dashboard
     private void StokBarangMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_StokBarangMouseClicked
-    FormStokbarang stokBarang = new FormStokbarang();
-    stokBarang.setVisible(true); // Menampilkan form baru
-    
+
     //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
     new FormStokbarang(this.loggedInUsername, this.loggedInRole).setVisible(true);
     
@@ -486,14 +496,44 @@ public class FormDashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_StokBarangMouseClicked
 
     private void DashboardMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DashboardMouseClicked
-    FormDashboard dashboard = new FormDashboard();
-    dashboard.setVisible(true);
-    
+
     //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
     new FormDashboard(this.loggedInUsername, this.loggedInRole).setVisible(true);
     
     this.dispose();
     }//GEN-LAST:event_DashboardMouseClicked
+
+    private void BarangMasukMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BarangMasukMouseClicked
+
+        //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
+        new FormBarangmasuk(this.loggedInUsername, this.loggedInRole).setVisible(true);
+
+        this.dispose();
+    }//GEN-LAST:event_BarangMasukMouseClicked
+
+    private void BarangKeluarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BarangKeluarMouseClicked
+
+        //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
+        new FormBarangkeluar(this.loggedInUsername, this.loggedInRole).setVisible(true);
+
+        this.dispose();
+    }//GEN-LAST:event_BarangKeluarMouseClicked
+
+    private void DataPenyewaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DataPenyewaMouseClicked
+
+        //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
+        new FormDatapenyewa(this.loggedInUsername, this.loggedInRole).setVisible(true);
+
+        this.dispose();
+    }//GEN-LAST:event_DataPenyewaMouseClicked
+
+    private void LaporanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_LaporanMouseClicked
+
+        //Buat menyimpan nilai User dan Role agar tidak hilang saat berpindah JForm
+        new FormLaporan(this.loggedInUsername, this.loggedInRole).setVisible(true);
+
+        this.dispose();
+    }//GEN-LAST:event_LaporanMouseClicked
     
     /**
      * @param args the command line arguments

@@ -3,9 +3,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package inventorytoko;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.Timer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import koneksi.koneksi;
 
 /**
@@ -17,11 +27,13 @@ public class FormBarangkeluar extends javax.swing.JFrame {
 //        private String username; // Tambahkan field untuk menyimpan username
         private String loggedInUsername; // Untuk menyimpan username yang login
         private String loggedInRole;     // Untuk menyimpan role yang login
-
+        private String tanggalDatabase; // Untuk isi kolom tanggal pada Form Barang keluar
+        
         //Buat Jam
     private void showTanggalDanJam() {
         // Format tanggal
         SimpleDateFormat tglFormat = new SimpleDateFormat("dd-MM-yyyy");
+        SimpleDateFormat tglFormatDb = new SimpleDateFormat("yyyy-MM-dd");
         SimpleDateFormat jamFormat = new SimpleDateFormat("HH:mm:ss");
 
         // Timer berjalan setiap detik
@@ -29,6 +41,7 @@ public class FormBarangkeluar extends javax.swing.JFrame {
             Date now = new Date();
             labelTanggal.setText(tglFormat.format(now));
             labelJam.setText(jamFormat.format(now));
+            tanggalDatabase = tglFormatDb.format(now);
         });
         timer.start();
     }
@@ -38,6 +51,91 @@ public class FormBarangkeluar extends javax.swing.JFrame {
         labelUser.setText("User: " + loggedInUsername + "   Role: " + loggedInRole); 
         // Pastikan Anda memiliki JLabel dengan nama lblUserInfo di desain FormDashboard Anda.
     } 
+    
+   
+    private void cariBarang(String keyword, String kolom) {
+    DefaultTableModel model = new DefaultTableModel();
+    model.addColumn("Kode Barang");
+    model.addColumn("Nama Barang");
+    model.addColumn("Stok");
+
+        try {
+            Connection conn = new koneksi().connect();
+            String sql = "SELECT * FROM stokbarang WHERE " + kolom + " LIKE ?";
+            PreparedStatement pst = conn.prepareStatement(sql);
+            pst.setString(1, "%" + keyword + "%");
+            ResultSet rs = pst.executeQuery();
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getString("kode_barang"),
+                    rs.getString("nama_barang"),
+                    rs.getInt("stok_barang")
+                });
+            }
+            tableCariBarang.setModel(model);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    private void simpanDataPenyewa() {
+    String kodeBarang = textKodebarang.getText();
+    String namaBarang = textNamabarang.getText();
+    String namaPelanggan = textNamapelanggan.getText();
+    int jumlah = Integer.parseInt(textJumlah.getText());
+
+    String tanggalTransaksi = labelTanggal.getText(); // Ambil tanggal dari label yang diupdate otomatis
+    String statusTransaksi = comboStatus.getSelectedItem().toString(); // "Disewa" atau "Kembali"
+
+    try {
+        Connection conn = new koneksi().connect();
+
+        // Cek stok barang
+        String cekStokSQL = "SELECT stok_barang FROM stokbarang WHERE kode_barang = ?";
+        PreparedStatement cekStokStmt = conn.prepareStatement(cekStokSQL);
+        cekStokStmt.setString(1, kodeBarang);
+        ResultSet rs = cekStokStmt.executeQuery();
+
+        if (rs.next()) {
+            int stokTersedia = rs.getInt("stok_barang");
+
+            if (jumlah > stokTersedia) {
+                JOptionPane.showMessageDialog(this, "Stok tidak cukup untuk disewa");
+                return;
+            }
+
+            // Update stok barang
+            String updateStokSQL = "UPDATE stokbarang SET stok_barang = stok_barang - ? WHERE kode_barang = ?";
+            PreparedStatement updateStokStmt = conn.prepareStatement(updateStokSQL);
+            updateStokStmt.setInt(1, jumlah);
+            updateStokStmt.setString(2, kodeBarang);
+            updateStokStmt.executeUpdate();
+
+            // Simpan data penyewa
+            String insertSQL = "INSERT INTO datatransaksi (nama_pelanggan, kode_barang, nama_barang, jumlah, tanggal_transaksi, status) VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement insertStmt = conn.prepareStatement(insertSQL);
+            insertStmt.setString(1, namaPelanggan);
+            insertStmt.setString(2, kodeBarang);
+            insertStmt.setString(3, namaBarang);
+            insertStmt.setInt(4, jumlah);
+            insertStmt.setString(5, tanggalDatabase);
+            insertStmt.setString(6, statusTransaksi);
+            insertStmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Data berhasil disimpan dan stok dikurangi");
+        } else {
+            JOptionPane.showMessageDialog(this, "Kode barang tidak ditemukan");
+        }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+
     
     /**
      * Creates new form TampilanUtama
@@ -55,6 +153,47 @@ public class FormBarangkeluar extends javax.swing.JFrame {
         this.loggedInUsername = username;
         this.loggedInRole = role;
         displayUserAndRole();
+        
+//        cariBarang();
+        
+        textKodebarang.getDocument().addDocumentListener(new DocumentListener() {
+        public void insertUpdate(DocumentEvent e) {
+            cariBarang(textKodebarang.getText(), "kode_barang");
+        }
+
+        public void removeUpdate(DocumentEvent e) {
+            cariBarang(textKodebarang.getText(), "kode_barang");
+        }
+
+        public void changedUpdate(DocumentEvent e) {
+            cariBarang(textKodebarang.getText(), "kode_barang");
+        }
+    });
+
+    // DocumentListener untuk pencarian berdasarkan Nama Barang
+        textNamabarang.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                cariBarang(textNamabarang.getText(), "nama_barang");
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                cariBarang(textNamabarang.getText(), "nama_barang");
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                cariBarang(textNamabarang.getText(), "nama_barang");
+            }
+        });
+    
+        tableCariBarang.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int row = tableCariBarang.getSelectedRow();
+                if (row != -1) {
+                    textKodebarang.setText(tableCariBarang.getValueAt(row, 0).toString());
+                    textNamabarang.setText(tableCariBarang.getValueAt(row, 1).toString());
+                }
+            }
+        });
     }
     
     /**
@@ -78,7 +217,7 @@ public class FormBarangkeluar extends javax.swing.JFrame {
         labelStatus = new javax.swing.JLabel();
         comboStatus = new javax.swing.JComboBox<>();
         textJumlah = new javax.swing.JTextField();
-        textNamapenyewa = new javax.swing.JTextField();
+        textNamapelanggan = new javax.swing.JTextField();
         buttonSave = new javax.swing.JButton();
         Laporan = new javax.swing.JButton();
         DataPenyewa = new javax.swing.JButton();
@@ -114,6 +253,7 @@ public class FormBarangkeluar extends javax.swing.JFrame {
         });
         baseBG.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        tableCariBarang.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         tableCariBarang.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null},
@@ -125,15 +265,24 @@ public class FormBarangkeluar extends javax.swing.JFrame {
                 "Kode Barang", "Nama Barang", "Stok Barang"
             }
         ));
+        tableCariBarang.setRowHeight(25);
         jScrollPane1.setViewportView(tableCariBarang);
+        if (tableCariBarang.getColumnModel().getColumnCount() > 0) {
+            tableCariBarang.getColumnModel().getColumn(1).setPreferredWidth(300);
+        }
 
-        baseBG.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 180, -1, 80));
+        baseBG.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(232, 180, 470, 80));
 
         labelKode.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         labelKode.setText("Kode Barang");
-        baseBG.add(labelKode, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 280, 130, 30));
+        baseBG.add(labelKode, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 280, 150, 30));
 
         textKodebarang.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        textKodebarang.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textKodebarangActionPerformed(evt);
+            }
+        });
         baseBG.add(textKodebarang, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 280, 300, 30));
 
         textNamabarang.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -141,31 +290,37 @@ public class FormBarangkeluar extends javax.swing.JFrame {
 
         labelNamabarang.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         labelNamabarang.setText("Nama Barang");
-        baseBG.add(labelNamabarang, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 325, 130, 30));
+        baseBG.add(labelNamabarang, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 325, 150, 30));
 
         labelNama.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         labelNama.setText("Nama Pelanggan");
-        baseBG.add(labelNama, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 370, 130, 30));
+        baseBG.add(labelNama, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 370, 150, 30));
 
         labelJumlahbarang.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         labelJumlahbarang.setText("Jumlah Barang");
-        baseBG.add(labelJumlahbarang, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 415, 130, 30));
+        baseBG.add(labelJumlahbarang, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 415, 150, 30));
 
         labelStatus.setFont(new java.awt.Font("Segoe UI", 1, 16)); // NOI18N
         labelStatus.setText("Status Transaksi");
-        baseBG.add(labelStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 460, 130, 30));
+        baseBG.add(labelStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(240, 460, 150, 30));
 
+        comboStatus.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         comboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Sewa", "Pembelian" }));
         baseBG.add(comboStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 460, 300, 30));
 
         textJumlah.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         baseBG.add(textJumlah, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 415, 300, 30));
 
-        textNamapenyewa.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        baseBG.add(textNamapenyewa, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 370, 300, 30));
+        textNamapelanggan.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        baseBG.add(textNamapelanggan, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 370, 300, 30));
 
         buttonSave.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         buttonSave.setText("Save");
+        buttonSave.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                buttonSaveMouseClicked(evt);
+            }
+        });
         buttonSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonSaveActionPerformed(evt);
@@ -514,6 +669,14 @@ public class FormBarangkeluar extends javax.swing.JFrame {
     private void buttonSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSaveActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_buttonSaveActionPerformed
+
+    private void textKodebarangActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textKodebarangActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textKodebarangActionPerformed
+
+    private void buttonSaveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonSaveMouseClicked
+        simpanDataPenyewa(); // Memanggil method saat tombol diklik
+    }//GEN-LAST:event_buttonSaveMouseClicked
     
     /**
      * @param args the command line arguments
@@ -579,6 +742,6 @@ public class FormBarangkeluar extends javax.swing.JFrame {
     private javax.swing.JTextField textJumlah;
     private javax.swing.JTextField textKodebarang;
     private javax.swing.JTextField textNamabarang;
-    private javax.swing.JTextField textNamapenyewa;
+    private javax.swing.JTextField textNamapelanggan;
     // End of variables declaration//GEN-END:variables
 }

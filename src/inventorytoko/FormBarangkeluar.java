@@ -79,6 +79,14 @@ public class FormBarangkeluar extends javax.swing.JFrame {
         }
     }
     
+    protected void kosong(){
+        textKodebarang.setText("");
+        textNamabarang.setText("");
+        textNamapelanggan.setText("");
+        textJumlah.setText("");
+        comboStatus.setSelectedIndex(0);
+    }
+    
     
     private void simpanDataPenyewa() {
     String kodeBarang = textKodebarang.getText();
@@ -125,6 +133,10 @@ public class FormBarangkeluar extends javax.swing.JFrame {
             insertStmt.executeUpdate();
 
             JOptionPane.showMessageDialog(this, "Data berhasil disimpan dan stok dikurangi");
+            
+            kosong(); // Clear input field
+            textNamabarang.requestFocus();
+//            datatable(); // Refresh tabel
         } else {
             JOptionPane.showMessageDialog(this, "Kode barang tidak ditemukan");
         }
@@ -306,6 +318,11 @@ public class FormBarangkeluar extends javax.swing.JFrame {
 
         comboStatus.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         comboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Sewa", "Pembelian" }));
+        comboStatus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                comboStatusActionPerformed(evt);
+            }
+        });
         baseBG.add(comboStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 460, 300, 30));
 
         textJumlah.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
@@ -677,6 +694,10 @@ public class FormBarangkeluar extends javax.swing.JFrame {
     private void buttonSaveMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonSaveMouseClicked
         simpanDataPenyewa(); // Memanggil method saat tombol diklik
     }//GEN-LAST:event_buttonSaveMouseClicked
+
+    private void comboStatusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_comboStatusActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_comboStatusActionPerformed
     
     /**
      * @param args the command line arguments

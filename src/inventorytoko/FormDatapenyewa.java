@@ -6,6 +6,14 @@ package inventorytoko;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.Timer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JComboBox;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.Connection;
+import javax.swing.JOptionPane;
 import koneksi.koneksi;
 
 /**
@@ -17,6 +25,8 @@ public class FormDatapenyewa extends javax.swing.JFrame {
 //        private String username; // Tambahkan field untuk menyimpan username
         private String loggedInUsername; // Untuk menyimpan username yang login
         private String loggedInRole;     // Untuk menyimpan role yang login
+        
+        Connection conn = new koneksi().connect();
 
         //Buat Jam
     private void showTanggalDanJam() {
@@ -38,6 +48,68 @@ public class FormDatapenyewa extends javax.swing.JFrame {
         labelUser.setText("User: " + loggedInUsername + "   Role: " + loggedInRole); 
         // Pastikan Anda memiliki JLabel dengan nama lblUserInfo di desain FormDashboard Anda.
     } 
+
+    JComboBox<String> comboBoxStatus = new JComboBox<>(new String[] { "Sewa", "Dikembalikan" });
+
+    private void tampilkanDataPenyewa() {
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("ID Transaksi");
+        model.addColumn("Nama Pelanggan");
+        model.addColumn("Kode Barang");
+        model.addColumn("Nama Barang");
+        model.addColumn("Jumlah");
+        model.addColumn("Tanggal");
+        model.addColumn("Status");
+
+        try {
+
+            String sql = "SELECT * FROM datatransaksi WHERE status = 'Sewa'";
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getString("id_transaksi"),
+                    rs.getString("nama_pelanggan"),
+                    rs.getString("kode_barang"),
+                    rs.getString("nama_barang"),
+                    rs.getInt("jumlah"),
+                    rs.getDate("tanggal_transaksi"),
+                    rs.getString("status")
+                });
+            }
+
+            tableDataPenyewa.setModel(model);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Gagal menampilkan data: " + e);
+        }
+    }
+    
+    private void updateStatusSewa(){
+        int selectedRow = tableDataPenyewa.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(null, "Silakan pilih data yang ingin diubah statusnya.");
+            return;
+        }
+
+        String idTransaksi = tableDataPenyewa.getValueAt(selectedRow, 0).toString();
+        String statusBaru = comboStatus.getSelectedItem().toString();
+
+        try {
+            String sql = "UPDATE datatransaksi SET status = ? WHERE id_transaksi = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, statusBaru);
+            ps.setString(2, idTransaksi);
+            ps.executeUpdate();
+
+            JOptionPane.showMessageDialog(null, "Status berhasil diperbarui.");
+            tampilkanDataPenyewa(); // refresh table
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Gagal mengubah status: " + e);
+        }    
+    }
+
+    
     
     /**
      * Creates new form TampilanUtama
@@ -51,6 +123,7 @@ public class FormDatapenyewa extends javax.swing.JFrame {
         initComponents();
 //        this.username = username;
         showTanggalDanJam();
+        tampilkanDataPenyewa();
         
         this.loggedInUsername = username;
         this.loggedInRole = role;
@@ -67,6 +140,10 @@ public class FormDatapenyewa extends javax.swing.JFrame {
     private void initComponents() {
 
         baseBG = new javax.swing.JPanel();
+        comboStatus = new javax.swing.JComboBox<>();
+        buttonUpdate = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tableDataPenyewa = new javax.swing.JTable();
         Laporan = new javax.swing.JButton();
         DataPenyewa = new javax.swing.JButton();
         BarangKeluar = new javax.swing.JButton();
@@ -100,6 +177,39 @@ public class FormDatapenyewa extends javax.swing.JFrame {
             }
         });
         baseBG.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        comboStatus.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        comboStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Sewa", "Dikembalikan" }));
+        baseBG.add(comboStatus, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 540, 150, 30));
+
+        buttonUpdate.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        buttonUpdate.setText("Update");
+        buttonUpdate.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                buttonUpdateMouseClicked(evt);
+            }
+        });
+        baseBG.add(buttonUpdate, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 540, 100, 30));
+
+        tableDataPenyewa.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "ID Transaksi", "Nama Pelanggan", "Kode Barang", "Nama Barang", "Jumlah", "Tanggal", "Status"
+            }
+        ));
+        jScrollPane1.setViewportView(tableDataPenyewa);
+        if (tableDataPenyewa.getColumnModel().getColumnCount() > 0) {
+            tableDataPenyewa.getColumnModel().getColumn(0).setPreferredWidth(60);
+            tableDataPenyewa.getColumnModel().getColumn(2).setPreferredWidth(50);
+            tableDataPenyewa.getColumnModel().getColumn(4).setPreferredWidth(30);
+        }
+
+        baseBG.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 180, 630, 340));
 
         Laporan.setBackground(new java.awt.Color(254, 129, 0));
         Laporan.setFont(new java.awt.Font("sansserif", 1, 18)); // NOI18N
@@ -438,6 +548,11 @@ public class FormDatapenyewa extends javax.swing.JFrame {
 
         this.dispose();
     }//GEN-LAST:event_LaporanMouseClicked
+
+    private void buttonUpdateMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonUpdateMouseClicked
+        // TODO add your handling code here:
+        updateStatusSewa();
+    }//GEN-LAST:event_buttonUpdateMouseClicked
     
     /**
      * @param args the command line arguments
@@ -487,9 +602,13 @@ public class FormDatapenyewa extends javax.swing.JFrame {
     private javax.swing.JLabel Title;
     private javax.swing.JLabel background;
     private javax.swing.JPanel baseBG;
+    private javax.swing.JButton buttonUpdate;
+    private javax.swing.JComboBox<String> comboStatus;
     private javax.swing.JLabel exitbtn;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel labelJam;
     private javax.swing.JLabel labelTanggal;
     private javax.swing.JLabel labelUser;
+    private javax.swing.JTable tableDataPenyewa;
     // End of variables declaration//GEN-END:variables
 }

@@ -3,9 +3,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package inventorytoko;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.swing.Timer;
+import javax.swing.*;
 import koneksi.koneksi;
 
 /**
@@ -39,6 +40,41 @@ public class FormDashboard extends javax.swing.JFrame {
         // Pastikan Anda memiliki JLabel dengan nama lblUserInfo di desain FormDashboard Anda.
     } 
     
+    private void loadDashboardData() {
+        try {
+            Connection conn = new koneksi().connect(); // Pastikan class koneksi sudah benar
+            Statement stmt = conn.createStatement();
+
+            // Jumlah barang
+            ResultSet rs = stmt.executeQuery("SELECT SUM(stok_barang) FROM stokbarang");
+            if (rs.next()) jumlahbarang.setText(rs.getString(1));
+
+            // Jumlah penyewa
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM datatransaksi WHERE status='Sewa'");
+            if (rs.next()) jumlahpenyewa.setText(rs.getString(1));
+
+            // Barang masuk 1 bulan terakhir
+            rs = stmt.executeQuery("SELECT SUM(jumlah) FROM datatransaksi WHERE tanggal_transaksi >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)");
+            if (rs.next()) {
+                String val = rs.getString(1);
+                barangmasuk.setText(val == null ? "0" : val); // Handle null
+            }
+
+            // Barang keluar
+            rs = stmt.executeQuery("SELECT SUM(jumlah) FROM datatransaksi");
+            if (rs.next()) {
+                String val = rs.getString(1);
+                barangkeluar.setText(val == null ? "0" : val);
+            }
+
+            rs.close();
+            stmt.close();
+            conn.close();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Gagal load data dashboard: " + e.getMessage());
+        }
+    }
+
     /**
      * Creates new form TampilanUtama
      */
@@ -55,6 +91,8 @@ public class FormDashboard extends javax.swing.JFrame {
         this.loggedInUsername = username;
         this.loggedInRole = role;
         displayUserAndRole();
+        
+        loadDashboardData();
     }
     
     /**
@@ -79,7 +117,7 @@ public class FormDashboard extends javax.swing.JFrame {
         pn_penyewa = new javax.swing.JPanel();
         penyewa = new javax.swing.JLabel();
         IconPenyewa = new javax.swing.JLabel();
-        nilaipenyewa = new javax.swing.JLabel();
+        jumlahpenyewa = new javax.swing.JLabel();
         pn_barangmasuk = new javax.swing.JPanel();
         jumlahBarangMasuk = new javax.swing.JLabel();
         IconBrgMasuk = new javax.swing.JLabel();
@@ -87,11 +125,11 @@ public class FormDashboard extends javax.swing.JFrame {
         pn_barangkeluar = new javax.swing.JPanel();
         jumlahBarang1 = new javax.swing.JLabel();
         IconBrgKeluar = new javax.swing.JLabel();
-        JumlahBarangKeluar = new javax.swing.JLabel();
+        barangkeluar = new javax.swing.JLabel();
         pn_barang = new javax.swing.JPanel();
         jumlahBarang = new javax.swing.JLabel();
         Icon = new javax.swing.JLabel();
-        JumlahBarang = new javax.swing.JLabel();
+        jumlahbarang = new javax.swing.JLabel();
         Title = new javax.swing.JLabel();
         exitbtn = new javax.swing.JLabel();
         background = new javax.swing.JLabel();
@@ -268,10 +306,10 @@ public class FormDashboard extends javax.swing.JFrame {
         IconPenyewa.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/People.png"))); // NOI18N
         pn_penyewa.add(IconPenyewa, new org.netbeans.lib.awtextra.AbsoluteConstraints(135, 55, -1, -1));
 
-        nilaipenyewa.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        nilaipenyewa.setForeground(new java.awt.Color(255, 255, 255));
-        nilaipenyewa.setText("9999");
-        pn_penyewa.add(nilaipenyewa, new org.netbeans.lib.awtextra.AbsoluteConstraints(35, 55, -1, -1));
+        jumlahpenyewa.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        jumlahpenyewa.setForeground(new java.awt.Color(255, 255, 255));
+        jumlahpenyewa.setText("9999");
+        pn_penyewa.add(jumlahpenyewa, new org.netbeans.lib.awtextra.AbsoluteConstraints(35, 55, -1, -1));
 
         baseBG.add(pn_penyewa, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 190, 200, 130));
 
@@ -308,10 +346,10 @@ public class FormDashboard extends javax.swing.JFrame {
         IconBrgKeluar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Out.png"))); // NOI18N
         pn_barangkeluar.add(IconBrgKeluar, new org.netbeans.lib.awtextra.AbsoluteConstraints(135, 55, -1, -1));
 
-        JumlahBarangKeluar.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        JumlahBarangKeluar.setForeground(new java.awt.Color(255, 255, 255));
-        JumlahBarangKeluar.setText("9999");
-        pn_barangkeluar.add(JumlahBarangKeluar, new org.netbeans.lib.awtextra.AbsoluteConstraints(35, 55, -1, -1));
+        barangkeluar.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        barangkeluar.setForeground(new java.awt.Color(255, 255, 255));
+        barangkeluar.setText("9999");
+        pn_barangkeluar.add(barangkeluar, new org.netbeans.lib.awtextra.AbsoluteConstraints(35, 55, -1, -1));
 
         baseBG.add(pn_barangkeluar, new org.netbeans.lib.awtextra.AbsoluteConstraints(500, 380, 200, 130));
 
@@ -328,10 +366,10 @@ public class FormDashboard extends javax.swing.JFrame {
         Icon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/Inventory.png"))); // NOI18N
         pn_barang.add(Icon, new org.netbeans.lib.awtextra.AbsoluteConstraints(135, 55, -1, -1));
 
-        JumlahBarang.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
-        JumlahBarang.setForeground(new java.awt.Color(255, 255, 255));
-        JumlahBarang.setText("9999");
-        pn_barang.add(JumlahBarang, new org.netbeans.lib.awtextra.AbsoluteConstraints(35, 55, -1, -1));
+        jumlahbarang.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        jumlahbarang.setForeground(new java.awt.Color(255, 255, 255));
+        jumlahbarang.setText("9999");
+        pn_barang.add(jumlahbarang, new org.netbeans.lib.awtextra.AbsoluteConstraints(35, 55, -1, -1));
 
         baseBG.add(pn_barang, new org.netbeans.lib.awtextra.AbsoluteConstraints(230, 190, 200, 130));
 
@@ -580,22 +618,22 @@ public class FormDashboard extends javax.swing.JFrame {
     private javax.swing.JLabel IconBrgKeluar;
     private javax.swing.JLabel IconBrgMasuk;
     private javax.swing.JLabel IconPenyewa;
-    private javax.swing.JLabel JumlahBarang;
-    private javax.swing.JLabel JumlahBarangKeluar;
     private javax.swing.JButton Laporan;
     private javax.swing.JButton StokBarang;
     private javax.swing.JLabel Title;
     private javax.swing.JLabel background;
+    private javax.swing.JLabel barangkeluar;
     private javax.swing.JLabel barangmasuk;
     private javax.swing.JPanel baseBG;
     private javax.swing.JLabel exitbtn;
     private javax.swing.JLabel jumlahBarang;
     private javax.swing.JLabel jumlahBarang1;
     private javax.swing.JLabel jumlahBarangMasuk;
+    private javax.swing.JLabel jumlahbarang;
+    private javax.swing.JLabel jumlahpenyewa;
     private javax.swing.JLabel labelJam;
     private javax.swing.JLabel labelTanggal;
     private javax.swing.JLabel labelUser;
-    private javax.swing.JLabel nilaipenyewa;
     private javax.swing.JLabel penyewa;
     private javax.swing.JPanel pn_barang;
     private javax.swing.JPanel pn_barangkeluar;
